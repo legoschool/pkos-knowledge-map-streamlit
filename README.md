@@ -88,6 +88,21 @@ Windows 터미널에서는 활성화 대신 `.venv\Scripts\python.exe`를 직접
 
 여러 GB의 자료실, 학생 정보, 업무 문서 등은 전체 로컬 버전이 적합합니다. 온라인 서비스를 쓰기 위해 실제 자료를 GitHub 저장소에 넣을 필요는 없습니다.
 
+## Render에서 간편 배포하기
+
+Streamlit Community Cloud 대신 Render에서도 같은 파이썬 프로그램을 실행할 수 있습니다.
+
+**[Render에 배포하기](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Flegoschool%2Fpkos-knowledge-map-streamlit)**
+
+1. 위 링크를 열고 Render에 로그인합니다. 처음이라면 GitHub 계정으로 가입할 수 있습니다.
+2. 서비스 목록의 `pkos-knowledge-map`과 **Free** 설정을 확인하고 배포를 진행합니다. 저장소·실행 파일·실행 명령은 `render.yaml`이 지정합니다.
+3. 배포가 끝나고 상태가 **Live**가 되면 표시되는 `https://…onrender.com` 주소를 엽니다.
+4. **예제 16개로 시작**으로 확인한 뒤 주소를 공유합니다.
+
+이 저장소는 `plan: free`를 명시하며 유료 데이터베이스나 디스크를 만들지 않습니다. 무료 서비스는 15분간 접속이 없으면 쉬었다가 다음 접속 때 다시 시작하므로 처음 열 때 약 1분 걸릴 수 있습니다. 재시작 시 임시 자료가 사라질 수 있어 결과를 내려받아 보관하세요. 큰 개인 자료실은 내 컴퓨터에서 실행하는 전체 로컬판을 이용하세요. [공식 무료 서비스 안내](https://render.com/docs/free)
+
+간편 배포 링크로 만든 서비스는 자동 업데이트를 끕니다. 새 버전을 적용할 때 Render의 **Manual Deploy → Deploy latest commit**을 사용합니다. 이 문서와 링크만으로 배포가 완료되는 것은 아니며, 실제 실행 주소는 배포 성공 후 확인합니다. [공식 간편 배포 안내](https://render.com/docs/deploy-to-render)
+
 ## Streamlit Community Cloud에 배포하기
 
 아래는 배포 설정 안내입니다. **이 문서의 저장소 주소는 실행 중인 앱 주소가 아니며, 배포 URL은 Community Cloud에서 배포가 끝난 뒤 확인합니다.**

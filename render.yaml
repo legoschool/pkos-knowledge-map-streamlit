@@ -1,0 +1,16 @@
+# Deploy the same Python app using the included Dockerfile.
+# Keep the Free plan explicit: omitting it selects a paid default.
+services:
+  - type: web
+    name: pkos-knowledge-map
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /_stcore/health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: PORT
+        value: "8501"
