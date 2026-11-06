@@ -97,6 +97,61 @@ class StreamlitWorkflowTests(unittest.TestCase):
         self.run_ok()
         self.assertFalse(app.get_by_key("source_uploads").proto.disabled)
 
+    def test_resource_visit_preserves_saved_map_and_prepared_downloads(self):
+        app = self.demo()
+        saved_note = "설명서를 읽고 돌아와도 유지할 메모"
+        app.text_area(key="edit_notes").set_value(saved_note)
+        app.button(key="save_edit").click()
+        self.run_ok()
+        app.get_by_key("step").set_value(STEPS[2])
+        self.run_ok()
+        app.button(key="prepare_downloads").click()
+        self.run_ok()
+        before = json.loads(json.dumps(app.session_state["snapshot"]))
+        downloads = dict(app.session_state["downloads"])
+        workspace = app.session_state["workspace"]
+
+        app.get_by_key("view").set_value("guide")
+        self.run_ok()
+        self.assertEqual(app.session_state["snapshot"], before)
+        self.assertIs(app.session_state["workspace"], workspace)
+        self.assertTrue(app.get("iframe"))
+
+        app.get_by_key("view").set_value("map")
+        self.run_ok()
+        self.assertEqual(app.get_by_key("step").value, STEPS[2])
+        self.assertEqual(app.session_state["downloads"], downloads)
+        self.assertEqual(app.session_state["snapshot"], before)
+        self.assertFalse(app.get("iframe"))
+        app.get_by_key("step").set_value(STEPS[1])
+        self.run_ok()
+        self.assertEqual(app.text_area(key="edit_notes").value, saved_note)
+
+    def test_resource_link_opens_manual_and_previews_the_downloaded_examples(self):
+        # URL-bound choices use the displayed label, not the internal option.
+        self.app.query_params["view"] = "설명서·예제"
+        with patch.object(WebWorkspace, "build_demo", side_effect=AssertionError("unexpected conversion")), patch.object(WebWorkspace, "build_uploads", side_effect=AssertionError("unexpected conversion")):
+            app = self.run_ok()
+            self.assertEqual(app.get_by_key("view").value, "guide")
+            self.assertIsNone(app.session_state["snapshot"])
+            self.assertEqual(len(app.get("iframe")), 1)
+            for key in ("guide_html_download", "guide_pdf_download", "example_zip_download"):
+                self.assertTrue(app.get_by_key(key).proto.url)
+            self.assertTrue(any("/app/static/PKOS_Beginner_Manual.html" in item.proto.url for item in app.link_button))
+
+            app.get_by_key("guide_section").set_value("examples")
+            self.run_ok()
+            self.assertFalse(app.get("iframe"))
+            choices = app.selectbox(key="example_document").options
+            self.assertEqual(len(choices), 16)
+            with zipfile.ZipFile(ROOT / "static" / "PKOS_Example_16.zip") as archive:
+                for name in (choices[0], choices[-1]):
+                    app.selectbox(key="example_document").select(name)
+                    self.run_ok()
+                    text = archive.read(name).decode("utf-8-sig")
+                    self.assertTrue(any(item.value == text.strip() for item in app.code))
+            self.assertIsNone(app.session_state["snapshot"])
+
     def test_demo_search_and_category_do_not_reconvert(self):
         app = self.demo()
         self.assertEqual([metric.value for metric in app.metric], ["16", "4", "24"])

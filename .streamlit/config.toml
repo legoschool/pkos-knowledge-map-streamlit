@@ -24,6 +24,7 @@ backgroundColor = "#edf1e5"
 secondaryBackgroundColor = "#fcfbf5"
 
 [server]
+enableStaticServing = true
 maxUploadSize = 20
 enableXsrfProtection = true
 enableCORS = true

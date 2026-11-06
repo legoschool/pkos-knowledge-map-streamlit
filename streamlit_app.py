@@ -6,6 +6,7 @@ from pathlib import Path
 
 import streamlit as st
 
+from resource_library import PUBLIC_FILES, public_bytes, render_resources
 from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
 
@@ -87,6 +88,10 @@ def report_error(error: Exception) -> None:
     st.text(str(error))
 
 
+def open_guides() -> None:
+    st.session_state["view"] = "guide"
+
+
 st.caption("PKOS · 개인 자료를 연결하는 작은 작업실")
 st.title("내 자료로 만드는 나만의 지식맵")
 st.markdown("**자료 넣기 → 살펴보고 정리 → 내 컴퓨터에 내려받기.** 처음이라면 가상 예제 16개로 시작하세요.")
@@ -94,15 +99,21 @@ st.markdown("**자료 넣기 → 살펴보고 정리 → 내 컴퓨터에 내려
 with st.sidebar:
     st.subheader("사용 안내")
     st.markdown("1. 예제 또는 내 파일 선택\n2. 검색·분야로 찾고 메모 추가\n3. HTML·JSON·ZIP 저장")
-    st.markdown("[내 컴퓨터에서 실행하기](#local-guide)")
-    manual = APP_DIR / "초보자_따라하기.html"
-    if manual.is_file():
-        st.download_button("초보자 사용설명서 받기", data=manual.read_bytes(), file_name=manual.name, mime="text/html", on_click="ignore", key="manual_download")
+    st.markdown("[내 컴퓨터에서 실행하기](/app/static/PKOS_Beginner_Manual.html#install-python)")
+    st.button("설명서·예제 바로보기", icon=":material/menu_book:", on_click=open_guides, key="open_guides", width="stretch")
+    st.download_button("초보자 사용설명서 받기", data=public_bytes("html"), file_name=PUBLIC_FILES["html"], mime="text/html", on_click="ignore", key="manual_download")
     st.caption("이 웹앱의 자료는 현재 브라우저 세션용입니다. 탭을 닫거나 서버가 재시작되면 잃을 수 있으므로 결과를 내려받으세요.")
     if st.session_state["snapshot"]:
         st.button("자료 지우고 처음으로", icon=":material/restart_alt:", key="reset_workspace", on_click=reset_session, width="stretch")
 
-step = st.segmented_control("진행 단계", STEPS, key="step", selection_mode="single", width="stretch") or STEPS[0]
+view = st.segmented_control("작업 화면", ["map", "guide"], default="map", required=True,
+                            format_func=lambda value: {"map": "지식맵 만들기", "guide": "설명서·예제"}[value],
+                            key="view", bind="query-params", width="stretch")
+if view == "guide":
+    render_resources()
+    st.stop()
+
+step = st.segmented_control("진행 단계", STEPS, key="step", selection_mode="single", persist_state="session", width="stretch") or STEPS[0]
 if notice := st.session_state.pop("notice", ""):
     st.success(notice)
 
