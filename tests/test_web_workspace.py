@@ -70,6 +70,7 @@ class WebWorkspaceTests(unittest.TestCase):
         self.assertNotIn("010-1234-5678", self.ws.export_json().decode())
         self.ws.edit(node["id"], {"title": "</script><script>OWNED_SCRIPT</script>"})
         self.assertNotIn(b"</script><script>OWNED_SCRIPT", self.ws.export_html())
+        assert self.ws._output is not None
         privacy = json.loads((self.ws._output / "_개인정보.json").read_text(encoding="utf-8"))
         self.assertTrue(all("original" not in r and "context" not in r for r in privacy["rows"]))
         with zipfile.ZipFile(io.BytesIO(self.ws.export_markdown_zip())) as archive:
@@ -90,6 +91,7 @@ class WebWorkspaceTests(unittest.TestCase):
 
     def test_invalid_names_reject_whole_batch_and_preserve_previous_map(self):
         self.ws.build_uploads(self.documents())
+        assert self.ws._output is not None
         before, project = self.ws.snapshot(), self.ws._output.parent
         names = ["../escape.txt", "/absolute.txt", "C:/outside.txt", "C:relative.txt", "a\\b.txt",
                  "//server/share.txt", "NUL.txt", "COM1.md", "COM¹.md", "a/../b.txt", "a//b.txt",
@@ -179,6 +181,7 @@ class WebWorkspaceTests(unittest.TestCase):
         self.assertEqual(result["graph"]["nodes"][0]["format"], "docx")
         self.assertEqual(result["errors"], [])
         self.assertGreater(result["stats"]["inspected_entries"], 1)
+        assert self.ws._output is not None
         self.assertEqual(list(self.ws._output.rglob("*.png")), [])
 
     def test_corrupt_document_errors_are_separate_from_batch_validation(self):
@@ -193,6 +196,7 @@ class WebWorkspaceTests(unittest.TestCase):
 
     def test_unexpected_failure_rolls_back_and_success_cleans_old_project(self):
         self.ws.build_uploads(self.documents())
+        assert self.ws._output is not None
         old, before = self.ws._output.parent, self.ws.snapshot()
         with patch("web_workspace.Converter.run", side_effect=RuntimeError("test failure")):
             with self.assertRaises(WorkspaceError):

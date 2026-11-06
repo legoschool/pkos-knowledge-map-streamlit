@@ -292,7 +292,7 @@ elif step == STEPS[2]:
 
 st.header("내 컴퓨터에서 실행하기", anchor="local-guide")
 with st.expander("개인 자료를 서버에 보내지 않고 사용하는 방법"):
-    st.markdown("1. 배포받은 ‘스트림릿_배포판’ 폴더 전체를 압축 해제합니다.\n2. Python 3.10 이상을 설치합니다.\n3. 폴더 안의 설치 명령 파일을 실행합니다.\n4. 실행 명령 파일로 앱을 열고 내 자료를 넣습니다.")
+    st.markdown("1. 배포받은 ‘스트림릿_배포판’ 폴더 전체를 압축 해제합니다.\n2. Python 3.12 이상을 설치합니다(3.12 권장).\n3. 폴더 안의 설치 명령 파일을 실행합니다.\n4. 실행 명령 파일로 앱을 열고 내 자료를 넣습니다.")
     st.caption("명령창으로 실행한다면 아래 명령을 사용하세요. 내 컴퓨터에서 실행한 앱의 업로드는 그 컴퓨터 안에서 처리됩니다.")
     st.code("python -m pip install -r requirements.txt\npython -m streamlit run streamlit_app.py --server.address 127.0.0.1", language="bash")
     st.caption("자동 분류와 연결은 폴더·태그·단어 규칙에 따른 제안입니다. AI 의미 분석이나 사실 검증 결과가 아닙니다.")

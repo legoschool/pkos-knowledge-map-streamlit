@@ -244,10 +244,12 @@ class WebWorkspace:
         if self._closed:
             raise WorkspaceError("이미 정리한 세션입니다. 새 작업공간을 만들어 주세요.")
 
-    def _require_map(self):
+    def _require_map(self) -> tuple[Path, dict]:
         self._ensure_open()
-        if self._graph is None or self._output is None:
+        output, graph = self._output, self._graph
+        if graph is None or output is None:
             raise WorkspaceError("먼저 예제 또는 업로드 자료로 지식맵을 만들어 주세요.")
+        return output, graph
 
     @property
     def graph(self):
@@ -330,53 +332,53 @@ class WebWorkspace:
 
     def document(self, doc_id):
         with self._operation():
-            self._require_map()
-            return read_document(self._output, doc_id)
+            output, _ = self._require_map()
+            return read_document(output, doc_id)
 
     def edit(self, doc_id, changes):
         with self._operation():
-            self._require_map()
-            self._graph = update_document(self._output, doc_id, changes, title=self._graph["title"])
+            output, graph = self._require_map()
+            self._graph = update_document(output, doc_id, changes, title=graph["title"])
             return self.snapshot()
 
     def link(self, source, target, label):
         with self._operation():
-            self._require_map()
-            self._graph = add_link(self._output, source, target, label, title=self._graph["title"])
+            output, graph = self._require_map()
+            self._graph = add_link(output, source, target, label, title=graph["title"])
             return self.snapshot()
 
     def unlink(self, source, target):
         with self._operation():
-            self._require_map()
-            self._graph = remove_link(self._output, source, target, title=self._graph["title"])
+            output, graph = self._require_map()
+            self._graph = remove_link(output, source, target, title=graph["title"])
             return self.snapshot()
 
     def export_html(self) -> bytes:
         with self._operation():
-            self._require_map()
-            return render_html(self._graph).encode("utf-8")
+            _, graph = self._require_map()
+            return render_html(graph).encode("utf-8")
 
     def export_json(self) -> bytes:
         with self._operation():
-            self._require_map()
-            return json.dumps(self._graph, ensure_ascii=False, indent=2).encode("utf-8")
+            _, graph = self._require_map()
+            return json.dumps(graph, ensure_ascii=False, indent=2).encode("utf-8")
 
     def export_markdown_zip(self) -> bytes:
         with self._operation():
-            self._require_map()
+            output, graph = self._require_map()
             buffer = io.BytesIO()
             with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-                archive.writestr("지식맵.json", json.dumps(self._graph, ensure_ascii=False, indent=2))
-                archive.writestr("지식맵.html", render_html(self._graph))
+                archive.writestr("지식맵.json", json.dumps(graph, ensure_ascii=False, indent=2))
+                archive.writestr("지식맵.html", render_html(graph))
                 archive.writestr("처리결과.json", json.dumps({"stats": self._stats, "errors": self._errors}, ensure_ascii=False, indent=2))
                 archive.writestr("읽어주세요.txt", "정리된 Markdown과 읽기 전용 지식맵입니다.\n업로드 원본과 그림 파일은 포함하지 않습니다.\nJSON/ZIP을 웹앱의 편집 가능한 프로젝트로 복원하는 기능은 없습니다.\n")
-                edits = self._output / "_knowledge_edits.json"
+                edits = output / "_knowledge_edits.json"
                 if edits.is_file():
                     archive.writestr("편집정보.json", edits.read_bytes())
-                for node in self._graph["nodes"]:
+                for node in graph["nodes"]:
                     relative = _safe_name(node["md"])
-                    path = (self._output / relative).resolve()
-                    if not path.is_relative_to(self._output.resolve()) or path.is_symlink():
+                    path = (output / relative).resolve()
+                    if not path.is_relative_to(output.resolve()) or path.is_symlink():
                         raise WorkspaceError("변환 자료의 경로를 확인할 수 없습니다.")
                     text = path.read_text(encoding="utf-8-sig")
                     body = re.sub(r"\A---\r?\n.*?\r?\n---\r?\n", "", text, count=1, flags=re.S).lstrip()
