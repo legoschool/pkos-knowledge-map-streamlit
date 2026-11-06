@@ -6,7 +6,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags, table_rows
+from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
 
 st.set_page_config(page_title="PKOS · 나의 지식맵", page_icon=":material/hub:", layout="wide")
@@ -188,7 +188,13 @@ elif step == STEPS[1]:
                              alt=f'검색에 일치하는 {len(matched)}개 자료 중 분야별 대표 {len(sample)}개와 연결 관계')
         else:
             st.caption(f'{(page - 1) * PAGE_SIZE + 1:,}–{min(page * PAGE_SIZE, len(matched)):,}번째 자료 · 한 페이지 최대 {PAGE_SIZE}개')
-            st.dataframe(table_rows(shown, graph), hide_index=True, height=380, key="document_table", alt="현재 페이지의 자료 제목, 분야, 형식, 태그")
+            with st.container(height=380, border=True, key="document_table"):
+                for offset, item in enumerate(shown, start=(page - 1) * PAGE_SIZE + 1):
+                    with st.container(border=False, gap="xsmall", key=f'document_row_{item["id"]}'):
+                        st.caption(f"자료 {offset:,}")
+                        st.text(item.get("title", "제목 없는 자료"))
+                        st.text(f'분야: {labels.get(item.get("category"), item.get("category", "미분류"))} · 형식: {item.get("format", "문서")}')
+                        st.text("태그: " + (", ".join(item.get("tags", [])) or "없음"))
         node = lookup[selected]
         with st.container(border=True):
             st.subheader("선택한 자료", icon=":material/description:")

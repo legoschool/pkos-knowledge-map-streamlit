@@ -65,12 +65,6 @@ def parse_tags(value: str) -> list[str]:
     return list(dict.fromkeys(tag.strip().lstrip("#").strip() for tag in re.split(r"[,，\n]", value) if tag.strip().lstrip("#").strip()))
 
 
-def table_rows(nodes: list[dict[str, Any]], graph: dict[str, Any]) -> list[dict[str, Any]]:
-    labels = category_labels(graph)
-    return [{"제목": str(node.get("title", "")), "분야": labels.get(str(node.get("category")), str(node.get("category", ""))),
-             "형식": str(node.get("format", "")), "태그": ", ".join(node.get("tags", []))} for node in nodes]
-
-
 def graph_option(graph: dict[str, Any], matched: list[dict[str, Any]], selected: str | None = None) -> dict[str, Any]:
     """A native ECharts graph. User strings stay plain text, including tooltips."""
     sample = balanced_sample(matched, selected=selected)

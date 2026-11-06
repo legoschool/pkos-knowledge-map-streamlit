@@ -27,6 +27,10 @@ def large_graph() -> dict:
             "stats": {"documents": 2800, "categories": 14, "links": 0}}
 
 
+def displayed_rows(app: AppTest):
+    return [block for block in app.container if block.key and block.key.startswith("document_row_")]
+
+
 class PresentationLogicTests(unittest.TestCase):
     def test_balanced_sample_retains_minority_and_selected(self):
         nodes = [{"id": f"major{i}", "category": "major"} for i in range(2000)]
@@ -103,13 +107,14 @@ class StreamlitWorkflowTests(unittest.TestCase):
             app.text_input(key="query").set_value("독서")
             self.run_ok()
             expected = filter_nodes(app.session_state["snapshot"]["graph"], "독서")
-            self.assertEqual(len(app.dataframe[0].value), len(expected))
+            self.assertEqual(len(displayed_rows(app)), len(expected))
+            self.assertEqual([row.text[0].value for row in displayed_rows(app)], [node["title"] for node in expected])
             app.button(key="clear_filters").click()
             self.run_ok()
             category = app.session_state["snapshot"]["graph"]["categories"][0]["id"]
             app.selectbox(key="category").select(category)
             self.run_ok()
-            self.assertEqual(len(app.dataframe[0].value), len(filter_nodes(app.session_state["snapshot"]["graph"], category=category)))
+            self.assertEqual(len(displayed_rows(app)), len(filter_nodes(app.session_state["snapshot"]["graph"], category=category)))
 
     def test_edit_notes_and_tags_persist_through_download_step(self):
         app = self.demo()
@@ -121,6 +126,13 @@ class StreamlitWorkflowTests(unittest.TestCase):
         node = next(node for node in app.session_state["snapshot"]["graph"]["nodes"] if node["id"] == selected)
         self.assertEqual(node["tags"], ["나의태그", "테스트"])
         self.assertEqual(node["notes"], "수업에서 활용할 나만의 메모")
+        app.get_by_key("view_mode").set_value("목록")
+        self.run_ok()
+        app.text_input(key="query").set_value("수업에서 활용할 나만의 메모")
+        self.run_ok()
+        self.assertEqual(len(displayed_rows(app)), 1)
+        self.assertEqual(displayed_rows(app)[0].text[0].value, node["title"])
+        self.assertIn("나의태그, 테스트", displayed_rows(app)[0].text[2].value)
         app.get_by_key("step").set_value(STEPS[2])
         self.run_ok()
         app.get_by_key("step").set_value(STEPS[1])
@@ -182,14 +194,16 @@ class StreamlitWorkflowTests(unittest.TestCase):
         app = self.run_ok()
         app.get_by_key("view_mode").set_value("목록")
         self.run_ok()
-        self.assertEqual(len(app.dataframe[0].value), 100)
+        self.assertEqual(len(displayed_rows(app)), 100)
         self.assertEqual(len(app.selectbox(key="selected_doc").options), 100)
         app.button(key="page_next").click()
         self.run_ok()
-        self.assertEqual(app.dataframe[0].value.iloc[0]["제목"], "unique100 자료")
+        self.assertEqual(len(displayed_rows(app)), 100)
+        self.assertEqual(displayed_rows(app)[0].text[0].value, "unique100 자료")
         app.text_input(key="query").set_value("unique2799")
         self.run_ok()
-        self.assertEqual(len(app.dataframe[0].value), 1)
+        self.assertEqual(len(displayed_rows(app)), 1)
+        self.assertEqual(displayed_rows(app)[0].text[0].value, "unique2799 자료")
         self.assertEqual(app.session_state["selected_doc"], "n2799")
         self.assertEqual(app.session_state["list_page"], 1)
 
