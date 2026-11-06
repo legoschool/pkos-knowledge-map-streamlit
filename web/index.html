@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>PKOS 지식맵 · 나의 자료를 연결하는 공간</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="PKOS 지식맵 처음 화면"><span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i></span><span>PKOS <strong>지식맵</strong><small>나의 자료를 연결하는 공간</small></span></a>
+    <nav class="top-actions" aria-label="도움말과 프로그램">
+      <span class="local-badge"><span aria-hidden="true"></span><span id="local-label">내 컴퓨터에서 실행 중</span></span>
+      <a href="/manual" target="_blank" rel="noopener" class="text-button live-only">사용설명서 ↗</a>
+      <button class="text-button live-only" id="shutdown">종료</button>
+    </nav>
+  </header>
+
+  <div class="app-shell">
+    <aside class="workspace-sidebar live-only" aria-label="자료 불러오기">
+      <div class="sidebar-heading"><span class="eyebrow">MY WORKSPACE</span><h2>자료에서 지도로</h2><p>흩어진 기록을 한곳에서<br>찾고, 연결하고, 다시 활용하세요.</p></div>
+      <form id="build-form">
+        <label for="project-title">지도 이름</label>
+        <input id="project-title" name="title" value="나의 지식맵" maxlength="100" autocomplete="off">
+        <fieldset class="mode-switch"><legend class="sr-only">자료를 가져오는 방법</legend><label><input type="radio" name="mode" value="convert" checked><span>새 자료 변환</span></label><label><input type="radio" name="mode" value="existing"><span>기존 변환 결과</span></label></fieldset>
+        <label for="source-path" id="source-label">내 자료 폴더</label>
+        <div class="path-input"><input id="source-path" name="source" placeholder="폴더를 선택하세요" required autocomplete="off"><button type="button" class="browse-button" data-browse="source" aria-label="내 자료 폴더 찾아보기">찾기</button></div>
+        <p class="field-help" id="source-help">문서·발표·사진 등 자료가 담긴 폴더를 고릅니다.</p>
+        <div id="output-field"><label for="output-path">결과 저장 폴더 <span class="optional">선택</span></label><div class="path-input"><input id="output-path" name="output" placeholder="비우면 원본 안 _변환결과" autocomplete="off"><button type="button" class="browse-button" data-browse="output" aria-label="결과 저장 폴더 찾아보기">찾기</button></div></div>
+        <details class="options" id="conversion-options"><summary>변환 옵션</summary><label class="check-label"><input type="checkbox" id="privacy" checked><span>본문의 개인정보 가리기<small>보고서에 가리기 전 값은 남기지 않습니다.</small></span></label><label class="check-label"><input type="checkbox" id="ocr"><span>사진·스캔 글자 읽기<small>Tesseract와 한국어 언어팩 설치가 필요합니다.</small></span></label></details>
+        <button class="primary build-button" type="submit" id="build-button"><span aria-hidden="true">✦</span> 지식맵 만들기</button>
+      </form>
+      <div id="browse-notice" class="browse-notice" role="status" hidden><p>폴더 선택 창을 확인하세요. 보이지 않으면 취소하고 경로를 직접 입력하세요.</p><button type="button" id="cancel-browse" class="secondary compact">선택 취소·직접 입력</button></div>
+      <div class="sidebar-divider"><span>먼저 둘러보고 싶다면</span></div>
+      <button id="demo-button" class="secondary demo-button">예제로 시작 <span aria-hidden="true">→</span></button>
+      <p class="sidebar-note">원본 파일은 그대로 둡니다.<br>변환본과 지도 설정을 결과 폴더에 저장합니다.</p>
+      <div class="sidebar-footer"><span class="tiny-mark">PKOS</span><span>개인 지식 운영 체계<br>LOCAL · PERSONAL · CONNECTED</span></div>
+    </aside>
+
+    <main class="workspace" id="main-content">
+      <div class="notice offline-notice" id="offline-notice" hidden><strong>읽기 전용 내보내기</strong><span>검색과 지도 탐색을 할 수 있습니다. 자료 수정과 원본 열기는 PKOS 프로그램에서 이용하세요.</span></div>
+      <section id="job-panel" class="job-panel" aria-live="polite" hidden><div class="job-heading"><span id="job-indicator" class="spinner" aria-hidden="true"></span><div><strong id="job-title">자료를 준비하고 있어요</strong><p id="job-message"></p></div></div><details id="job-details"><summary>진행 기록 보기</summary><pre id="job-logs"></pre></details></section>
+      <div class="error-panel" id="error-panel" role="alert" hidden><strong>작업을 완료하지 못했습니다</strong><p id="error-text"></p></div>
+
+      <section class="welcome" id="welcome">
+        <div class="welcome-copy"><span class="eyebrow">YOUR KNOWLEDGE, CONNECTED</span><h1>쌓아 둔 자료에<br><em>새로운 연결을.</em></h1><p>문서는 읽기 좋게 바꾸고,<br>주제와 태그가 같은 자료는 서로 이어줍니다.<br>오래된 기록에서 다음 아이디어를 찾아보세요.</p><button class="primary live-only" id="welcome-demo">예제로 시작 <span aria-hidden="true">↗</span></button><span class="welcome-caption live-only">설정 없이 예제 자료로 지도를 만들어 봅니다.</span></div>
+        <div class="welcome-art" aria-hidden="true"><svg viewBox="0 0 560 470"><defs><radialGradient id="halo"><stop offset="0%" stop-color="#c9e5da" stop-opacity=".65"/><stop offset="100%" stop-color="#c9e5da" stop-opacity="0"/></radialGradient></defs><circle cx="280" cy="235" r="235" fill="url(#halo)"/><g class="art-lines"><path d="M280 235L142 138M280 235L416 126M280 235L430 312M280 235L155 355M142 138L80 85M142 138L64 195M142 138L208 65M416 126L475 63M416 126L503 164M430 312L507 370M430 312L377 405M155 355L68 335M155 355L176 427M142 138L430 312M416 126L155 355"/></g><circle cx="280" cy="235" r="56" fill="#173c36"/><text x="280" y="232" fill="white" class="art-core">나의 지식</text><text x="280" y="252" fill="#c5d8d1" class="art-small">연결의 시작</text><g class="art-category"><circle cx="142" cy="138" r="38" fill="#d8e8ff"/><text x="142" y="144">배움</text><circle cx="416" cy="126" r="38" fill="#efe0f3"/><text x="416" y="132">기록</text><circle cx="430" cy="312" r="38" fill="#f5dfbc"/><text x="430" y="318">아이디어</text><circle cx="155" cy="355" r="38" fill="#cde7db"/><text x="155" y="361">프로젝트</text></g><g fill="#7f9fbc"><circle cx="80" cy="85" r="10"/><circle cx="64" cy="195" r="7"/><circle cx="208" cy="65" r="8"/></g><g fill="#b091b9"><circle cx="475" cy="63" r="9"/><circle cx="503" cy="164" r="8"/></g><g fill="#cbad7b"><circle cx="507" cy="370" r="9"/><circle cx="377" cy="405" r="7"/></g><g fill="#7da793"><circle cx="68" cy="335" r="8"/><circle cx="176" cy="427" r="9"/></g></svg><div class="art-caption"><span></span>자료가 모이면, 관계가 보입니다.</div></div>
+        <div class="welcome-steps"><article><span>01</span><div><h3>자료를 모으고</h3><p>내 폴더나 기존 PKOS 변환 결과를 불러옵니다.</p></div></article><article><span>02</span><div><h3>관계를 발견하고</h3><p>분야와 공통 태그를 기준으로 자료를 연결합니다.</p></div></article><article><span>03</span><div><h3>나의 지도로 남기기</h3><p>분류를 다듬고, 메모하고, 지도를 내보냅니다.</p></div></article></div>
+      </section>
+
+      <section id="explorer" hidden aria-label="지식맵 탐색">
+        <div class="explorer-heading"><div><span class="eyebrow">MY KNOWLEDGE MAP</span><h1 id="map-title">나의 지식맵</h1><p class="map-description" id="map-description">자료를 선택해 연결된 생각을 살펴보세요.</p></div><div class="export-actions live-only"><a class="secondary compact" href="/api/export?format=html" download>HTML 지도 ↓</a><a class="secondary compact" href="/api/export?format=json" download>JSON 데이터 ↓</a></div></div>
+        <div class="stats-strip"><div><span class="stat-symbol" aria-hidden="true">▤</span><strong id="stat-documents">0</strong><span>자료</span></div><div><span class="stat-symbol" aria-hidden="true">◈</span><strong id="stat-categories">0</strong><span>분야</span></div><div><span class="stat-symbol" aria-hidden="true">⌁</span><strong id="stat-links">0</strong><span>자료 사이의 연결</span></div><p>공통 태그와 직접 만든 관계로 연결됩니다.</p></div>
+        <div class="explorer-toolbar"><div class="search-box"><span aria-hidden="true">⌕</span><label class="sr-only" for="search">자료 검색</label><input type="search" id="search" placeholder="제목, 요약, 태그로 검색" autocomplete="off"><kbd>/</kbd></div><label class="sr-only" for="category-filter">분야</label><select id="category-filter"><option value="">모든 분야</option></select><div class="view-switch" role="group" aria-label="보기 방식"><button id="view-map" aria-pressed="true">지도</button><button id="view-list" aria-pressed="false">목록</button></div></div>
+        <div class="explorer-body"><div class="map-column"><div class="result-bar"><p id="result-count"></p><button id="clear-filters" class="text-button" hidden>검색 초기화</button></div><div class="map-canvas" id="map-canvas"><svg id="knowledge-svg" viewBox="-900 -630 1800 1260" role="group" aria-label="자료 관계 지도. 자료 원을 선택하면 상세 내용이 열립니다."><g id="map-transform"></g></svg><div class="map-empty" id="map-empty" hidden><span aria-hidden="true">⌕</span><h3>찾는 자료가 없습니다</h3><p>검색어를 줄이거나 다른 분야를 선택해 보세요.</p></div><div class="map-controls"><button id="zoom-out" aria-label="지도 축소">−</button><button id="zoom-reset" aria-label="지도 전체 보기">전체 보기</button><button id="zoom-in" aria-label="지도 확대">＋</button></div><p class="map-hint">드래그로 이동 · 휠로 확대 · 자료를 눌러 상세 보기</p></div><div id="document-list" class="document-list" hidden></div><div id="category-legend" class="category-legend" aria-label="분야별 색상"></div></div>
+          <aside id="detail-panel" class="detail-panel" aria-label="자료 상세"><div class="detail-placeholder" id="detail-placeholder"><span aria-hidden="true">✦</span><h2>연결을 따라가 보세요</h2><p>지도나 목록에서 자료를 선택하면<br>내용과 연결 이유를 볼 수 있습니다.</p></div><div id="detail-content" hidden><div class="detail-top"><span id="detail-category" class="category-badge"></span><button id="detail-close" class="icon-button" aria-label="상세 내용 닫기">×</button></div><h2 id="detail-title"></h2><p class="detail-format" id="detail-format"></p><div id="detail-tags" class="tags"></div><p id="detail-summary" class="detail-summary"></p><div id="detail-note-block" class="note-block" hidden><h3>나의 메모</h3><p id="detail-notes"></p></div><div class="open-actions live-only"><button id="open-source" class="secondary compact">원본 열기 ↗</button><button id="open-md" class="secondary compact">변환본 열기 ↗</button></div><details class="body-details" id="body-details"><summary>변환한 본문 읽기</summary><pre id="detail-body">자료를 불러오고 있습니다…</pre></details><details class="edit-details live-only" id="edit-details"><summary>분류·메모 수정</summary><form id="edit-form"><label for="edit-title">제목</label><input id="edit-title" required maxlength="200"><label for="edit-category">분야</label><input id="edit-category" list="category-options" required maxlength="100"><datalist id="category-options"></datalist><label for="edit-tags">태그 <span class="optional">쉼표로 구분</span></label><input id="edit-tags" maxlength="1000" placeholder="수업, 과학, 탐구"><label for="edit-notes">나의 메모</label><textarea id="edit-notes" rows="4" maxlength="10000" placeholder="이 자료를 어디에 활용할 수 있을까요?"></textarea><button class="primary compact" id="save-document" type="submit">변경 저장</button><p class="field-help">수정 내용은 결과 폴더에 따로 저장되어 다음 변환에도 유지됩니다.</p></form></details><section class="related-section"><h3>연결된 자료 <span id="related-count"></span></h3><div id="related-list"></div></section><details class="link-details live-only" id="link-details"><summary>직접 연결하기</summary><form id="link-form"><label for="link-target">연결할 자료</label><select id="link-target" required></select><label for="link-label">연결 이유</label><input id="link-label" maxlength="200" required placeholder="예: 이 수업을 준비하며 참고한 자료"><button type="submit" class="secondary compact" id="save-link">연결 추가</button></form></details><p class="source-path" id="detail-source"></p></div></aside>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+.git
+.venv
+venv
+__pycache__
+**/__pycache__
+*.pyc
+.streamlit/secrets.toml
+.env
+.env.*
+uploads
+outputs
+results
+session_data
+_runtime
+*.log
+*.tmp
