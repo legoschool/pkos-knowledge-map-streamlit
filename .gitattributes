@@ -1,2 +1,4 @@
 # Preserve the reviewed, downloadable HTML byte for byte on every platform.
 static/PKOS_Beginner_Manual.html -text
+static/*.pdf binary
+static/*.zip binary
