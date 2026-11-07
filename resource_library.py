@@ -39,7 +39,7 @@ def example_documents() -> dict[str, str]:
 def render_resources() -> None:
     st.header("설명서와 연습 자료")
     st.markdown("**처음 사용하는 분도 한 단계씩 따라오세요.** 자료 준비부터 설치·지도 편집·저장·온라인 배포까지 담았습니다.")
-    st.caption("초보자 설명서 · 15장 · 103단계 · PDF 75쪽 · 실제 화면과 공식 참고 그림 16개")
+    st.caption("초보자 설명서 · 15장 · 103단계 · PDF 72쪽 · 실제 화면과 공식 참고 그림 16개")
     with st.container(horizontal=True):
         st.download_button("HTML 설명서 받기", public_bytes("html"), file_name=PUBLIC_FILES["html"],
                            mime="text/html", icon=":material/download:", on_click="ignore", key="guide_html_download")

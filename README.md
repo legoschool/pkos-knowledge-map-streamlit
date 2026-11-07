@@ -2,7 +2,7 @@
 
 **[온라인 지식맵 열기](https://pkos-knowledge-map.onrender.com/)** · 처음에는 **예제 16개로 시작**을 누르세요. 무료 서버가 쉬고 있었다면 처음 열릴 때 잠시 기다릴 수 있습니다.
 
-**[설명서·예제 바로보기](https://pkos-knowledge-map.onrender.com/?view=%EC%84%A4%EB%AA%85%EC%84%9C%C2%B7%EC%98%88%EC%A0%9C)** · 사이트 안에서 75쪽 초보자 설명서를 읽고 HTML·PDF·예제 ZIP을 내려받을 수 있습니다. 예제 문서 16개도 하나씩 미리 볼 수 있습니다. [설명서만 크게 열기](https://pkos-knowledge-map.onrender.com/app/static/PKOS_Beginner_Manual.html) · [프로그램까지 포함한 전체 꾸러미](https://github.com/legoschool/pkos-knowledge-map-streamlit/releases/download/v1.1-manual/PKOS_Beginner_Kit_v1.1.zip)
+**[설명서·예제 바로보기](https://pkos-knowledge-map.onrender.com/?view=%EC%84%A4%EB%AA%85%EC%84%9C%C2%B7%EC%98%88%EC%A0%9C)** · 사이트 안에서 72쪽 초보자 설명서를 읽고 HTML·PDF·예제 ZIP을 내려받을 수 있습니다. 예제 문서 16개도 하나씩 미리 볼 수 있습니다. [설명서만 크게 열기](https://pkos-knowledge-map.onrender.com/app/static/PKOS_Beginner_Manual.html) · [프로그램까지 포함한 전체 꾸러미](https://github.com/legoschool/pkos-knowledge-map-streamlit/releases/download/v1.1-manual/PKOS_Beginner_Kit_v1.1.zip)
 
 내 자료를 넣고, 내용을 읽어 문서 사이의 연결을 살펴보고, 분류와 메모를 고쳐 나만의 지식맵을 만드는 파이썬 프로그램입니다. 기존 PKOS 자료 변환 엔진을 Streamlit 화면에 연결했습니다.
 
