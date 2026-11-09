@@ -97,6 +97,7 @@ class WorkspaceTests(unittest.TestCase):
 class AppTests(unittest.TestCase):
     def test_space_form_offers_zip_and_previews(self):
         app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=120)
+        app.query_params["view"] = "지식맵 만들기"
         app.run()
         app.button(key="build_demo").click()
         app.run()

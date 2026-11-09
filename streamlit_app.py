@@ -7,7 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from resource_library import PUBLIC_FILES, public_bytes, render_resources
+from resource_library import PUBLIC_FILES, public_bytes, render_report, render_resources
 from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
 
@@ -108,9 +108,12 @@ with st.sidebar:
     if st.session_state["snapshot"]:
         st.button("자료 지우고 처음으로", icon=":material/restart_alt:", key="reset_workspace", on_click=reset_session, width="stretch")
 
-view = st.segmented_control("작업 화면", ["map", "guide"], default="map", required=True,
-                            format_func=lambda value: {"map": "지식맵 만들기", "guide": "설명서·예제"}[value],
+view = st.segmented_control("작업 화면", ["report", "map", "guide"], default="report", required=True,
+                            format_func=lambda value: {"report": "설계·구상", "map": "지식맵 만들기", "guide": "설명서·예제"}[value],
                             key="view", bind="query-params", width="stretch")
+if view == "report":
+    render_report()
+    st.stop()
 if view == "guide":
     render_resources()
     st.stop()

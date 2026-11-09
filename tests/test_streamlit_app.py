@@ -66,6 +66,8 @@ class PresentationLogicTests(unittest.TestCase):
 class StreamlitWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=45)
+        # The app opens on the design report; workflow tests start on the map tool.
+        self.app.query_params["view"] = "지식맵 만들기"
 
     def tearDown(self):
         try:
@@ -126,6 +128,19 @@ class StreamlitWorkflowTests(unittest.TestCase):
         app.get_by_key("step").set_value(STEPS[1])
         self.run_ok()
         self.assertEqual(app.text_area(key="edit_notes").value, saved_note)
+
+    def test_design_report_is_the_first_screen(self):
+        app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=45)
+        app.run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.get_by_key("view").value, "report")
+        self.assertEqual(len(app.get("iframe")), 1)
+        self.assertTrue(any("/app/static/PKOS_Design_Report.html" in item.proto.url for item in app.link_button))
+        report = (ROOT / "static" / "PKOS_Design_Report.html").read_text(encoding="utf-8")
+        self.assertTrue(report.startswith("<!doctype html>"))
+        self.assertLess(report.index("구상: 설계 원칙"), report.index("업무 프로세스"))
+        self.assertLess(report.index("시스템 구성도"), report.index("이렇게 만든 지식맵"))
+        self.assertIsNone(app.session_state["snapshot"])
 
     def test_resource_link_opens_manual_and_previews_the_downloaded_examples(self):
         # URL-bound choices use the displayed label, not the internal option.
