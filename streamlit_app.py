@@ -7,7 +7,8 @@ from pathlib import Path
 
 import streamlit as st
 
-from resource_library import PUBLIC_FILES, public_bytes, render_report, render_resources
+from report_view import render_report
+from resource_library import PUBLIC_FILES, public_bytes, render_resources
 from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
 

@@ -16,7 +16,6 @@ PUBLIC_FILES = {
     "html": "PKOS_Beginner_Manual.html",
     "pdf": "PKOS_Beginner_Manual.pdf",
     "examples": "PKOS_Example_16.zip",
-    "report": "PKOS_Design_Report.html",
 }
 KIT_URL = "https://github.com/legoschool/pkos-knowledge-map-streamlit/releases/download/v1.1-manual/PKOS_Beginner_Kit_v1.1.zip"
 
@@ -70,12 +69,3 @@ def render_resources() -> None:
             st.link_button("설명서 크게 보기 · 새 탭", "/app/static/PKOS_Beginner_Manual.html", icon=":material/open_in_new:")
             st.caption("아래 설명서 안에서 검색하거나 그림을 눌러 확대할 수 있습니다.")
         st.iframe(RESOURCE_DIR / PUBLIC_FILES["html"], height=850, alt="PKOS 초보자 설명서: 자료 준비부터 설치와 배포까지 103단계")
-
-
-def render_report() -> None:
-    st.header("설계와 구상")
-    st.markdown("**이 프로그램을 어떻게 구상하고 설계했는지** 먼저 보여 드려요. 설계 원칙, 업무 프로세스, 시스템 구성도 다음에 결과 사이트 레고학교.com과 데이터 처리 단계가 나와요.")
-    with st.container(horizontal=True, vertical_alignment="center"):
-        st.link_button("보고서 크게 보기 · 새 탭", "/app/static/" + PUBLIC_FILES["report"], icon=":material/open_in_new:")
-        st.caption("지식맵을 직접 만들어 보려면 위의 ‘지식맵 만들기’를 누르세요.")
-    st.iframe(RESOURCE_DIR / PUBLIC_FILES["report"], height=900, alt="PKOS 개인 지식맵 설계 보고서: 구상, 업무 프로세스, 시스템 구성도")
