@@ -7,8 +7,8 @@ from pathlib import Path
 
 import streamlit as st
 
-from report_view import render_report
-from resource_library import PUBLIC_FILES, public_bytes, render_resources
+from hub_view import go, render_design, render_home
+from resource_library import render_resources
 from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
 
@@ -91,33 +91,29 @@ def report_error(error: Exception) -> None:
     st.text(str(error))
 
 
-def open_guides() -> None:
-    st.session_state["view"] = "guide"
+VIEWS = {"home": "처음 화면", "design": "설계 보기", "map": "지식맵 만들기", "guide": "설명서·예제"}
 
-
-st.caption("PKOS · 개인 자료를 연결하는 작은 작업실")
-st.title("내 자료로 만드는 나만의 지식맵")
-st.markdown("**자료 넣기 → 살펴보고 정리 → 내 컴퓨터에 내려받기.** 처음이라면 가상 예제 16개로 시작하세요.")
+st.title("PKOS 나의 지식맵")
 
 with st.sidebar:
-    st.subheader("사용 안내")
-    st.markdown("1. 예제 또는 내 파일 선택\n2. 검색·분야로 찾고 메모 추가\n3. HTML·JSON·ZIP 저장")
-    st.markdown("[내 컴퓨터에서 실행하기](/app/static/PKOS_Beginner_Manual.html#install-python)")
-    st.button("설명서·예제 바로보기", icon=":material/menu_book:", on_click=open_guides, key="open_guides", width="stretch")
-    st.download_button("초보자 사용설명서 받기", data=public_bytes("html"), file_name=PUBLIC_FILES["html"], mime="text/html", on_click="ignore", key="manual_download")
-    st.caption("이 웹앱의 자료는 현재 브라우저 세션용입니다. 탭을 닫거나 서버가 재시작되면 잃을 수 있으므로 결과를 내려받으세요.")
+    st.button("처음 화면", icon=":material/home:", key="go_home", on_click=go, args=({"view": "home"},), width="stretch")
     if st.session_state["snapshot"]:
         st.button("자료 지우고 처음으로", icon=":material/restart_alt:", key="reset_workspace", on_click=reset_session, width="stretch")
+    st.caption("이 웹앱의 자료는 지금 브라우저 세션에만 있어요. 탭을 닫거나 서버가 다시 시작되면 사라지니 결과를 내려받으세요.")
 
-view = st.segmented_control("작업 화면", ["report", "map", "guide"], default="report", required=True,
-                            format_func=lambda value: {"report": "설계·구상", "map": "지식맵 만들기", "guide": "설명서·예제"}[value],
-                            key="view", bind="query-params", width="stretch")
-if view == "report":
-    render_report()
+view = st.segmented_control("화면", list(VIEWS), default="home", required=True, format_func=VIEWS.get,
+                            key="view", bind="query-params", width="stretch", label_visibility="collapsed")
+if view == "home":
+    render_home()
+    st.stop()
+if view == "design":
+    render_design()
     st.stop()
 if view == "guide":
     render_resources()
     st.stop()
+
+st.markdown("**자료 넣기 → 살펴보고 정리 → 내려받기** 순서로 진행해요. 처음이라면 가상 예제 16개로 시작하세요.")
 
 step = st.segmented_control("진행 단계", STEPS, key="step", selection_mode="single", persist_state="session", width="stretch") or STEPS[0]
 if notice := st.session_state.pop("notice", ""):
@@ -161,7 +157,8 @@ if step == STEPS[0]:
                 report_error(error)
 
 elif not st.session_state["snapshot"] or not st.session_state["snapshot"].get("graph"):
-    st.info("먼저 ‘1 · 자료 넣기’에서 예제 또는 내 파일로 지도를 만들어 주세요.", title="아직 지도가 없습니다")
+    st.info("먼저 ‘1 · 자료 넣기’에서 예제 또는 내 파일로 지도를 만들어 주세요. 지도가 생기면 살펴보기, 내려받기, 우주 지도·3D 교실을 할 수 있어요.", title="아직 지도가 없습니다")
+    st.button("1 · 자료 넣기로 가기", icon=":material/arrow_back:", key="to_step1", on_click=go, args=({"step": STEPS[0]},), type="primary")
 
 elif step == STEPS[1]:
     snapshot = st.session_state["snapshot"]

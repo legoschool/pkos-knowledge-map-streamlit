@@ -129,17 +129,32 @@ class StreamlitWorkflowTests(unittest.TestCase):
         self.run_ok()
         self.assertEqual(app.text_area(key="edit_notes").value, saved_note)
 
-    def test_design_report_is_the_first_screen(self):
+    def test_home_hub_buttons_open_each_part(self):
         app = AppTest.from_file(str(ROOT / "streamlit_app.py"), default_timeout=45)
         app.run()
         self.assertFalse(app.exception)
-        self.assertEqual(app.get_by_key("view").value, "report")
+        self.assertEqual(app.get_by_key("view").value, "home")
+        for key in ("concept", "workflow", "system", "pipeline", "result", "report", "demo", "upload", "space", "manual", "examples"):
+            self.assertIsNotNone(app.button(key=f"home_{key}"))
+        app.button(key="home_workflow").click()
+        app.run()
+        self.assertEqual(app.get_by_key("view").value, "design")
+        self.assertEqual(app.get_by_key("design_part").value, "workflow")
+        self.assertEqual(len(app.get("image")), 1)
+        app.get_by_key("design_part").set_value("report")
+        app.run()
         self.assertEqual(len(app.get("iframe")), 1)
         self.assertTrue(any("/app/static/PKOS_Design_Report.html" in item.proto.url for item in app.link_button))
         report = (ROOT / "static" / "PKOS_Design_Report.html").read_text(encoding="utf-8")
-        self.assertTrue(report.startswith("<!doctype html>"))
-        self.assertLess(report.index("구상: 설계 원칙"), report.index("업무 프로세스"))
-        self.assertLess(report.index("시스템 구성도"), report.index("이렇게 만든 지식맵"))
+        self.assertLess(report.index("구상: 설계 원칙"), report.index("이렇게 만든 지식맵"))
+        app.button(key="design_home").click()
+        app.run()
+        self.assertEqual(app.get_by_key("view").value, "home")
+        app.button(key="home_space").click()
+        app.run()
+        self.assertEqual(app.get_by_key("view").value, "map")
+        self.assertEqual(app.get_by_key("step").value, STEPS[2])
+        self.assertIsNotNone(app.button(key="to_step1"))
         self.assertIsNone(app.session_state["snapshot"])
 
     def test_resource_link_opens_manual_and_previews_the_downloaded_examples(self):
