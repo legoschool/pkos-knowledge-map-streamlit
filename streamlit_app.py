@@ -7,7 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from hub_view import go, render_design, render_home
+from app_views import go, render_design, render_home, render_sidebar
 from resource_library import render_resources
 from view_helpers import MAP_LIMIT, PAGE_SIZE, balanced_sample, category_labels, document_label, filter_nodes, graph_option, parse_tags
 from web_workspace import ALLOWED_EXTENSIONS, WebWorkspace
@@ -93,13 +93,8 @@ def report_error(error: Exception) -> None:
 
 VIEWS = {"home": "처음 화면", "design": "설계 보기", "map": "지식맵 만들기", "guide": "설명서·예제"}
 
-st.title("PKOS 나의 지식맵")
-
-with st.sidebar:
-    st.button("처음 화면", icon=":material/home:", key="go_home", on_click=go, args=({"view": "home"},), width="stretch")
-    if st.session_state["snapshot"]:
-        st.button("자료 지우고 처음으로", icon=":material/restart_alt:", key="reset_workspace", on_click=reset_session, width="stretch")
-    st.caption("이 웹앱의 자료는 지금 브라우저 세션에만 있어요. 탭을 닫거나 서버가 다시 시작되면 사라지니 결과를 내려받으세요.")
+st.title("PKOS :blue[나의 지식맵]")
+render_sidebar(reset_session, bool(st.session_state["snapshot"]))
 
 view = st.segmented_control("화면", list(VIEWS), default="home", required=True, format_func=VIEWS.get,
                             key="view", bind="query-params", width="stretch", label_visibility="collapsed")

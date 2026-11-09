@@ -1,4 +1,4 @@
-"""Home hub and design pages: every part of the project behind one button."""
+"""Navigation: home hub, sidebar menu and design pages. Every part sits behind one button."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,6 +19,9 @@ DESIGN_PARTS = {
     "result": "결과 사이트",
     "report": "전체 보고서",
 }
+
+# group title -> markdown color used for its icons and card titles
+GROUP_COLORS = {"설계 보기": "blue", "직접 해 보기": "red", "자료": "green"}
 
 # (card id, icon, title, one line, target)
 HOME_GROUPS = [
@@ -67,12 +70,12 @@ def go(target: dict) -> None:
         st.session_state[key] = value
 
 
-def _cards(cards: list, columns: int = 3) -> None:
+def _cards(cards: list, color: str, columns: int = 3) -> None:
     for start in range(0, len(cards), columns):
         row = st.columns(columns)
         for column, (card_id, icon, title, line, target) in zip(row, cards[start:start + columns]):
             with column.container(border=True, height="stretch"):
-                st.markdown(f"#### {icon} {title}")
+                st.markdown(f"#### :{color}[{icon}] {title}")
                 st.caption(line)
                 if isinstance(target, str):
                     st.link_button("열기 ↗", target, key=f"home_{card_id}", width="stretch")
@@ -83,9 +86,10 @@ def _cards(cards: list, columns: int = 3) -> None:
 def render_home() -> None:
     st.markdown("흩어진 블로그·유튜브·드라이브 자료를 모아 **연결된 지식맵**으로 만들고, **우주 지도와 3D 교실**로 보여 주는 파이썬 프로그램이에요. 아래 버튼에서 보고 싶은 것을 고르세요.")
     for title, line, cards in HOME_GROUPS:
-        st.subheader(title)
+        color = GROUP_COLORS[title]
+        st.subheader(f":{color}[{title}]", divider=color)
         st.caption(line)
-        _cards(cards)
+        _cards(cards, color)
 
 
 def _back() -> None:
@@ -142,3 +146,39 @@ def render_design() -> None:
         st.header("전체 보고서")
         st.link_button("보고서 크게 보기 · 새 탭", "/app/static/" + REPORT_FILE, icon=":material/open_in_new:")
         st.iframe(STATIC / REPORT_FILE, height=900, alt="PKOS 개인 지식맵 설계 보고서")
+
+
+def _active(target: dict) -> bool:
+    state = st.session_state
+    if target.get("view") != state.get("view", "home"):
+        return False
+    if "design_part" in target:
+        return state.get("design_part", "concept") == target["design_part"]
+    if "guide_section" in target:
+        return state.get("guide_section", "manual") == target["guide_section"]
+    if "step" in target and target["view"] == "map":
+        same_step = state.get("step") == target["step"]
+        if "input_mode" in target:
+            return same_step and state.get("input_mode", "예제로 연습") == target["input_mode"]
+        return same_step
+    return True
+
+
+def render_sidebar(on_reset, has_map: bool) -> None:
+    """Whole menu as buttons; the current page is the highlighted (primary) one."""
+    with st.sidebar:
+        st.markdown("## PKOS 나의 지식맵")
+        st.button("처음 화면", icon=":material/home:", key="nav_home", on_click=go, args=({"view": "home"},),
+                  type="primary" if st.session_state.get("view", "home") == "home" else "secondary", width="stretch")
+        for title, _, cards in HOME_GROUPS:
+            st.markdown(f"**{title}**")
+            for card_id, icon, label, _, target in cards:
+                if isinstance(target, str):
+                    st.link_button(label, target, icon=icon, key=f"nav_{card_id}", width="stretch")
+                else:
+                    st.button(label, icon=icon, key=f"nav_{card_id}", on_click=go, args=(target,),
+                              type="primary" if _active(target) else "secondary", width="stretch")
+        if has_map:
+            st.divider()
+            st.button("자료 지우고 처음으로", icon=":material/restart_alt:", key="reset_workspace", on_click=on_reset, width="stretch")
+        st.caption("이 웹앱의 자료는 지금 브라우저 세션에만 있어요. 탭을 닫거나 서버가 다시 시작되면 사라지니 결과를 내려받으세요.")

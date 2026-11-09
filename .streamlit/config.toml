@@ -1,27 +1,42 @@
+# 레고학교 색감: 밝은 본문 + 우주 남색 사이드바, 레고 파랑·노랑·빨강 포인트
 [theme]
 base = "light"
-primaryColor = "#2d6548"
-backgroundColor = "#fcfbf5"
-secondaryBackgroundColor = "#edf1e5"
-textColor = "#233f31"
-linkColor = "#2d6548"
-borderColor = "#d6dfcc"
-codeBackgroundColor = "#f0f2e9"
-font = "sans-serif"
+primaryColor = "#2457D6"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF3FF"
+textColor = "#18213F"
+linkColor = "#2457D6"
+borderColor = "#D9E2F7"
+codeBackgroundColor = "#F2F5FC"
+codeTextColor = "#18213F"
+redColor = "#E3000B"
+orangeColor = "#F27A00"
+yellowColor = "#E0A800"
+greenColor = "#1E9A55"
+blueColor = "#2457D6"
+violetColor = "#7A3FE0"
+font = "Noto Sans KR:https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+headingFont = "Do Hyeon:https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap"
 baseFontSize = 16
-baseRadius = "10px"
-buttonRadius = "8px"
+baseRadius = "12px"
+buttonRadius = "10px"
 showWidgetBorder = true
-showSidebarBorder = true
-headingFontSizes = ["36px", "28px", "22px", "18px", "16px", "14px"]
-headingFontWeights = [700, 650, 600, 600, 600, 600]
+showSidebarBorder = false
+headingFontSizes = ["40px", "30px", "24px", "20px", "17px", "15px"]
+headingFontWeights = [400, 400, 400, 400, 400, 400]
 paddingTop = "1.5rem"
 paddingBottom = "3rem"
-chartCategoricalColors = ["#35654b", "#718b52", "#bb9150", "#5e8991", "#927f9e", "#a66e59", "#52756b", "#9b9b62"]
+chartCategoricalColors = ["#2457D6", "#E3000B", "#F5B700", "#1E9A55", "#7A3FE0", "#F27A00", "#0097A7", "#5B6B8C"]
 
 [theme.sidebar]
-backgroundColor = "#edf1e5"
-secondaryBackgroundColor = "#fcfbf5"
+backgroundColor = "#101A3D"
+secondaryBackgroundColor = "#1C2A5E"
+textColor = "#EEF2FF"
+borderColor = "#2E3F7A"
+primaryColor = "#E3000B"
+linkColor = "#FFD866"
+codeBackgroundColor = "#1C2A5E"
+codeTextColor = "#EEF2FF"
 
 [server]
 enableStaticServing = true
