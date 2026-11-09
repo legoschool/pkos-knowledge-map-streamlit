@@ -1,6 +1,7 @@
 """PKOS Streamlit interface. Each browser session owns its workspace and caches."""
 from __future__ import annotations
 
+import base64
 import math
 from pathlib import Path
 
@@ -19,7 +20,7 @@ APP_DIR = Path(__file__).resolve().parent
 if "workspace" not in st.session_state:
     st.session_state["workspace"] = WebWorkspace()
 for key, value in {"snapshot": None, "step": STEPS[0], "query": "", "category": "", "list_page": 1,
-                   "selected_doc": None, "revision": 0, "body_cache": {}, "downloads": None,
+                   "selected_doc": None, "revision": 0, "body_cache": {}, "downloads": None, "space": None,
                    "notice": "", "edit_identity": None}.items():
     st.session_state.setdefault(key, value)
 
@@ -44,6 +45,7 @@ def commit_result(snapshot: dict, message: str, selected: str | None = None, *, 
     st.session_state["revision"] += 1
     st.session_state["body_cache"] = {}
     st.session_state["downloads"] = None
+    st.session_state["space"] = None
     st.session_state["edit_identity"] = None
     st.session_state["notice"] = message
     st.session_state["pending_view"] = {"step": STEPS[1], "selected": selected, "clear_filters": clear_filters}
@@ -306,6 +308,34 @@ elif step == STEPS[2]:
             st.download_button("JSON 데이터 받기", data=downloads["json"], file_name="나의_지식맵.json", mime="application/json", key="download_json", on_click="ignore")
             st.download_button("정리 파일 ZIP 받기", data=downloads["zip"], file_name="나의_정리자료.zip", mime="application/zip", key="download_zip", on_click="ignore")
         st.success("파일을 준비했습니다. 위 버튼을 눌러 컴퓨터에 저장하세요.")
+
+    st.subheader("우주 지도와 3D 교실로 보기", anchor="space-map")
+    st.markdown("지식맵을 레고학교.com과 같은 구조의 **우주 지도**와 **3D 교실**로 바꿔요. 분야는 행성과 교실이 되고, 자료는 위성과 책상이 돼요.")
+    graph_title = (st.session_state["snapshot"] or {}).get("graph", {}).get("title", "나의 지식맵")
+    with st.form("space_form", border=False):
+        name_col, hub_col = st.columns(2)
+        space_title = name_col.text_input("지도 이름", value=graph_title, max_chars=60, key="space_title")
+        space_hub = hub_col.text_input("가운데 해에 쓸 이름", max_chars=20, key="space_hub", placeholder="예: 김선생님 (비우면 지도 이름)")
+        per_area = st.slider("분야마다 올릴 자료 수", min_value=5, max_value=40, value=18, key="space_per_area",
+                             help="연결이 많은 자료부터 고릅니다. 3D 교실에는 분야마다 책상을 20개까지 놓아요.")
+        made = st.form_submit_button("우주 지도 만들기", type="primary", icon=":material/public:")
+    if made:
+        try:
+            with st.spinner("행성과 교실을 배치하고 있어요…"):
+                st.session_state["space"] = workspace.export_space(title=space_title, byline=space_hub, per_area=per_area)
+        except Exception as error:
+            report_error(error)
+    if space := st.session_state["space"]:
+        st.download_button("우주 지도·3D 교실 ZIP 받기", data=space["zip"], file_name="나의_우주지도.zip", mime="application/zip",
+                           key="download_space", on_click="ignore", icon=":material/download:")
+        st.caption(f"분야 {space['areas']}개, 자료 {space['items']}건을 올렸어요. ZIP을 풀고 index.html을 열면 우주 지도, school.html을 열면 3D 교실이에요. 3D 교실은 인터넷 연결이 필요해요.")
+        map_tab, school_tab = st.tabs(["우주 지도 미리 보기", "3D 교실 미리 보기"])
+        # data: URLs give the preview its own origin, separate from the app.
+        with map_tab:
+            st.iframe("data:text/html;base64," + base64.b64encode(space["map"].encode("utf-8")).decode("ascii"), height=620, alt="우주 지도 미리 보기")
+        with school_tab:
+            st.caption("교실 화면을 한 번 누른 뒤 WASD 또는 방향키로 걸어요. 책상 위 브릭을 누르면 자료가 열려요.")
+            st.iframe("data:text/html;base64," + base64.b64encode(space["school"].encode("utf-8")).decode("ascii"), height=620, alt="3D 교실 미리 보기")
 
 st.header("내 컴퓨터에서 실행하기", anchor="local-guide")
 with st.expander("개인 자료를 서버에 보내지 않고 사용하는 방법"):

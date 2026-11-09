@@ -24,6 +24,7 @@ from engine import Converter, Settings
 from engine.sniff import sniff_bytes
 from knowledge import add_link, build_graph, read_document, remove_link, update_document
 from knowledge_server import export_html as render_html
+from space_export import DEFAULT_PER_AREA, build_dx, package_zip, standalone_html
 
 ROOT = Path(__file__).resolve().parent
 ALLOWED_EXTENSIONS = tuple("txt md markdown csv tsv html htm pdf doc docx dotx rtf hwp hwpx odt ppt pptx pptm ppsx potx xls xlsx xlsm xltx xltm srt vtt smi jpg jpeg png gif bmp webp tif tiff svg zip".split())
@@ -387,6 +388,15 @@ class WebWorkspace:
                     front = "---\n" + "\n".join(k + ": " + json.dumps(v, ensure_ascii=False) for k, v in metadata.items()) + "\n---\n\n"
                     archive.writestr("문서/" + relative, front + "# " + node["title"] + "\n\n" + body)
             return buffer.getvalue()
+
+    def export_space(self, *, title: str | None = None, byline: str = "", per_area: int = DEFAULT_PER_AREA) -> dict:
+        """Space map and 3D classroom built from the current knowledge map."""
+        with self._operation():
+            _, graph = self._require_map()
+            dx = build_dx(graph, title=title, byline=byline, per_area=per_area)
+            return {"zip": package_zip(dx), "map": standalone_html(dx, "index.html"),
+                    "school": standalone_html(dx, "school.html"),
+                    "areas": len(dx["areas"]), "items": sum(len(area["items"]) for area in dx["areas"])}
 
     def close(self):
         if self._closed:

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>나의 우주 지식지도</title>
+<style>
+:root {
+  --sky: #0b1026; --sky2: #1a1442; --ink: #eef1ff; --muted: #a9b0d6; --line: rgba(255,255,255,.14);
+  --panel: rgba(17,20,46,.94); --chip: rgba(255,255,255,.08); --sun1: #fff3b0; --sun2: #ffb627; --accent: #ffd34d;
+  --font: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: radial-gradient(ellipse at 50% 55%, var(--sky2), var(--sky) 70%); color: var(--ink); font-family: var(--font); overflow: hidden; word-break: keep-all; }
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#stars { position: fixed; inset: 0; width: 100%; height: 100%; }
+header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left)); background: linear-gradient(rgba(11,16,38,.92), rgba(11,16,38,0)); }
+.brand h1 { margin: 0; font-size: 19px; }
+.brand p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tools input { width: 190px; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.08); color: var(--ink); font: inherit; font-size: 14px; }
+.pill { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.06); cursor: pointer; font-size: 14px; text-decoration: none; color: var(--ink); white-space: nowrap; }
+.pill.hot { background: var(--accent); color: #1d1600; border-color: var(--accent); font-weight: 700; }
+#stage { position: fixed; inset: 0; }
+#orbit { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sun { position: absolute; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; border: 0; cursor: pointer; z-index: 5;
+  background: radial-gradient(circle at 40% 35%, var(--sun1), var(--sun2) 60%, #e07b00); box-shadow: 0 0 60px 18px rgba(255,182,39,.45);
+  display: grid; place-content: center; text-align: center; color: #3a2400; padding: 10px; }
+.sun b { font-size: 19px; line-height: 1.25; }
+.sun small { font-size: 11px; opacity: .8; margin-top: 4px; }
+.planet { position: absolute; left: 0; top: 0; border: 0; padding: 0; background: none; cursor: pointer; transform-origin: center; }
+.planet .ball { position: absolute; inset: 0; border-radius: 50%; box-shadow: inset -10px -12px 24px rgba(0,0,0,.45), 0 0 18px rgba(255,255,255,.12); }
+.planet .label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 120%; text-align: center; font-weight: 700; font-size: 13px; line-height: 1.25; text-shadow: 0 1px 3px rgba(0,0,0,.8); pointer-events: none; }
+.planet .label small { display: block; font-weight: 400; font-size: 10.5px; opacity: .85; }
+.planet .moon { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: #fff; opacity: .85; }
+.planet.dim { opacity: .25; }
+.planet.hit .ball { box-shadow: 0 0 0 3px var(--accent), 0 0 26px rgba(255,211,77,.7); }
+.zone-label { position: absolute; padding: 3px 10px; border-radius: 12px; border: 1px solid; font-size: 12px; font-weight: 700; background: rgba(11,16,38,.7); white-space: nowrap; transform: translate(-50%, -50%); pointer-events: none; }
+#legend { position: fixed; bottom: max(14px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 15; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+  padding: 8px 16px; border-radius: 20px; background: rgba(11,16,38,.8); border: 1px solid var(--line); font-size: 13px; max-width: calc(100% - 32px); }
+#legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 5px; }
+#legend:empty { display: none; }
+#panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100%); z-index: 30; background: var(--panel); border-left: 1px solid var(--line); backdrop-filter: blur(8px);
+  transform: translateX(105%); transition: transform .25s ease; display: flex; flex-direction: column; }
+#panel.open { transform: none; }
+#panel .head { padding: max(16px, env(safe-area-inset-top)) 18px 12px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }
+#panel .head h2 { margin: 0; font-size: 20px; flex: 1; }
+#panel .head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+#panel .close { border: 1px solid var(--line); background: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; flex: none; }
+#panel .body { overflow-y: auto; padding: 14px 18px max(24px, env(safe-area-inset-bottom)); display: grid; gap: 12px; align-content: start; }
+.story { margin: 0; color: #d7dbf5; font-size: 14.5px; line-height: 1.7; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,.04); display: grid; gap: 6px; }
+.card.flash { box-shadow: 0 0 0 2px var(--accent); }
+.card h3 { margin: 0; font-size: 15.5px; line-height: 1.4; }
+.card p { margin: 0; font-size: 13.5px; color: #cfd3ee; line-height: 1.6; }
+.card img { width: 100%; border-radius: 8px; aspect-ratio: 16/9; object-fit: cover; background: #222; }
+.kind { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--chip); color: var(--muted); margin-right: 6px; vertical-align: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chips span, .chips button { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--chip); border: 0; color: var(--muted); }
+.chips button { cursor: pointer; color: var(--ink); border: 1px solid var(--line); }
+.card a { color: var(--accent); font-size: 13px; }
+.where { font-size: 12px; color: var(--muted); }
+#flat { position: fixed; inset: 0; z-index: 10; overflow-y: auto; padding: 96px max(16px, env(safe-area-inset-right)) 80px max(16px, env(safe-area-inset-left)); display: none; }
+#flat.on { display: block; }
+#flat .grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+#flat .area { border-radius: 14px; padding: 14px; background: rgba(255,255,255,.05); border: 1px solid var(--line); border-top: 4px solid var(--c); display: grid; gap: 6px; align-content: start; text-align: left; cursor: pointer; }
+#flat .area h3 { margin: 0; font-size: 16px; }
+#flat .area p { margin: 0; font-size: 13px; color: var(--muted); }
+#flat .area ul { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: #d7dbf5; display: grid; gap: 2px; }
+body.flat #stage, body.flat #legend { visibility: hidden; }
+.empty { color: var(--muted); font-size: 14px; }
+@media (max-width: 640px) { .tools input { width: 140px; } .brand p { display: none; } }
+@media (prefers-reduced-motion: reduce) { #panel { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<header>
+  <div class="brand"><h1 id="title">나의 우주 지식지도</h1><p id="subtitle"></p></div>
+  <div class="tools">
+    <label class="sr" for="q" style="position:absolute;left:-9999px">자료 찾기</label>
+    <input id="q" type="search" placeholder="자료 찾기" autocomplete="off">
+    <button class="pill" id="flatBtn" type="button" aria-pressed="false">평면으로 보기</button>
+    <a class="pill hot" id="schoolLink" href="school.html">3D 교실</a>
+  </div>
+</header>
+<main id="stage" aria-label="분야 행성 지도"><canvas id="orbit" aria-hidden="true"></canvas></main>
+<section id="flat" aria-label="분야 목록"><div class="grid" id="flatGrid"></div></section>
+<nav id="legend" aria-label="분류"></nav>
+<aside id="panel" aria-live="polite"><div class="head"><div style="flex:1"><h2 id="pTitle"></h2><p id="pSub"></p></div><button class="close" id="pClose" type="button" aria-label="닫기">✕</button></div><div class="body" id="pBody"></div></aside>
+<script src="data.js"></script>
+<script>
+(function () {
+  'use strict';
+  const DX = window.DX || { title: '지도 데이터 없음', areas: [] };
+  const $ = (s) => document.querySelector(s);
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => /^https?:\/\//i.test(String(u || '')) ? String(u) : '';
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const KL = { video: '영상', site: '사이트', game: '게임', book: '책', post: '글', tool: '도구', doc: '자료' };
+  const areas = (DX.areas || []).filter((a) => a && Array.isArray(a.items));
+  areas.forEach((a, ai) => { a.items.forEach((it, ii) => { if (!it.id) it.id = a.id + '-' + ii; it._area = a; }); if (!a.count) a.count = a.items.length; });
+  const itemById = new Map(); areas.forEach((a) => a.items.forEach((it) => itemById.set(it.id, it)));
+  const hubName = typeof DX.hub === 'string' ? DX.hub : (DX.hub && DX.hub.name) || DX.title;
+  const hubSub = (DX.hub && DX.hub.sub) || '';
+  document.title = DX.title || document.title;
+  $('#title').textContent = DX.title || '나의 우주 지식지도';
+  $('#subtitle').textContent = [DX.byline, DX.intro && DX.intro.s].filter(Boolean).join(' · ');
+
+  // zones (optional): order areas so that zone members sit together on the orbit
+  const zones = (DX.zones || []).filter((z) => z && Array.isArray(z.areas));
+  let order = areas.slice();
+  if (zones.length) {
+    const rank = new Map(); zones.forEach((z, zi) => z.areas.forEach((id, k) => rank.set(id, zi * 100 + k)));
+    order.sort((a, b) => (rank.has(a.id) ? rank.get(a.id) : 1e6) - (rank.has(b.id) ? rank.get(b.id) : 1e6));
+    $('#legend').innerHTML = zones.map((z) => `<span style="--c:${esc(z.color || '#fff')}">${esc((z.no ? z.no + ' ' : '') + z.name)}</span>`).join('');
+  }
+  const zoneOf = (id) => zones.find((z) => z.areas.includes(id));
+
+  // stars
+  const sc = $('#stars'), sx = sc.getContext('2d');
+  let stars = [];
+  function drawStars() {
+    const dpr = Math.min(devicePixelRatio || 1, 2); sc.width = innerWidth * dpr; sc.height = innerHeight * dpr; sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!stars.length) for (let i = 0; i < 260; i++) stars.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.3 + .2, a: Math.random() * .7 + .3 });
+    sx.clearRect(0, 0, innerWidth, innerHeight);
+    stars.forEach((s) => { sx.globalAlpha = s.a; sx.fillStyle = '#fff'; sx.beginPath(); sx.arc(s.x * innerWidth, s.y * innerHeight, s.r, 0, 6.283); sx.fill(); });
+    sx.globalAlpha = 1;
+  }
+
+  // planets
+  const stage = $('#stage'), oc = $('#orbit'), ox = oc.getContext('2d');
+  const sun = document.createElement('button');
+  sun.className = 'sun'; sun.type = 'button';
+  sun.innerHTML = `<b>${esc(hubName)}</b><small>${esc(hubSub)}</small>`;
+  sun.addEventListener('click', openHub); stage.appendChild(sun);
+  const maxCount = Math.max(1, ...order.map((a) => a.count));
+  const planets = order.map((a, i) => {
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'planet'; el.setAttribute('aria-label', `${a.name}, 자료 ${a.count}건`);
+    const size = Math.round(52 + 62 * Math.sqrt(a.count / maxCount));
+    const color = a.color || '#5b8fe0';
+    const moons = Math.min(a.items.length, 12);
+    let html = `<span class="ball" style="background:radial-gradient(circle at 35% 30%, #ffffffaa, ${esc(color)} 38%, #0a0f2a 120%)"></span>`;
+    for (let m = 0; m < moons; m++) { const t = (m / moons) * Math.PI * 2; const r = size / 2 + 8; html += `<span class="moon" style="left:${size / 2 + Math.cos(t) * r}px;top:${size / 2 + Math.sin(t) * r * .55}px;background:${m % 3 ? '#fff' : esc(color)}"></span>`; }
+    html += `<span class="label">${esc(a.short || a.name)}<small>자료 ${a.count}</small></span>`;
+    el.innerHTML = html; el.style.width = el.style.height = size + 'px';
+    el.addEventListener('click', () => openArea(a));
+    el.addEventListener('mouseenter', () => { hover = true; }); el.addEventListener('mouseleave', () => { hover = false; });
+    stage.appendChild(el);
+    return { a, el, size, base: (i / order.length) * Math.PI * 2 };
+  });
+  const zoneEls = zones.map((z) => { const el = document.createElement('div'); el.className = 'zone-label'; el.style.color = el.style.borderColor = z.color || '#fff'; el.textContent = (z.no ? z.no + ' ' : '') + z.name; stage.appendChild(el); return { z, el }; });
+
+  let spin = 0, hover = false, W = 0, H = 0, cx = 0, cy = 0, rx = 0, ry = 0;
+  function layout() {
+    W = innerWidth; H = innerHeight; cx = W / 2; cy = H * .55; rx = Math.max(150, W * .41); ry = Math.max(110, H * .30);
+    const dpr = Math.min(devicePixelRatio || 1, 2); oc.width = W * dpr; oc.height = H * dpr; ox.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ox.clearRect(0, 0, W, H); ox.strokeStyle = 'rgba(255,255,255,.18)'; ox.setLineDash([3, 7]);
+    for (let k = 0; k < 3; k++) { ox.beginPath(); ox.ellipse(cx, cy, rx * (.62 + k * .19), ry * (.62 + k * .19), 0, 0, Math.PI * 2); ox.stroke(); }
+    sun.style.left = cx + 'px'; sun.style.top = cy + 'px';
+    drawStars(); place();
+  }
+  function place() {
+    planets.forEach((p) => {
+      const t = p.base + spin, depth = (Math.sin(t) + 1) / 2, scale = .72 + depth * .38;
+      const x = cx + Math.cos(t) * rx, y = cy + Math.sin(t) * ry;
+      p.el.style.transform = `translate(${x - p.size / 2}px, ${y - p.size / 2}px) scale(${scale})`;
+      p.el.style.zIndex = String(10 + Math.round(depth * 10)); p.x = x; p.y = y;
+    });
+    zoneEls.forEach(({ z, el }) => {
+      const ps = planets.filter((p) => z.areas.includes(p.a.id)); if (!ps.length) { el.style.display = 'none'; return; }
+      const mx = ps.reduce((s, p) => s + p.x, 0) / ps.length, my = ps.reduce((s, p) => s + p.y, 0) / ps.length;
+      const ang = Math.atan2(my - cy, mx - cx);
+      el.style.left = (cx + Math.cos(ang) * rx * 1.16) + 'px'; el.style.top = (cy + Math.sin(ang) * ry * 1.22) + 'px';
+    });
+  }
+  function tick() { if (!hover && !panelOpen() && !document.body.classList.contains('flat')) { spin += .0007; place(); } requestAnimationFrame(tick); }
+
+  // panel
+  const panel = $('#panel');
+  const panelOpen = () => panel.classList.contains('open');
+  function showPanel(title, sub, html) { $('#pTitle').textContent = title; $('#pSub').textContent = sub || ''; $('#pBody').innerHTML = html; $('#pBody').scrollTop = 0; panel.classList.add('open'); $('#pClose').focus({ preventScroll: true }); }
+  $('#pClose').addEventListener('click', () => panel.classList.remove('open'));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') panel.classList.remove('open'); });
+  function links(it) {
+    const out = []; const u = safeUrl(it.url); if (u) out.push(`<a href="${esc(u)}" target="_blank" rel="noopener">원본 열기 ↗</a>`);
+    if (it.yt) out.push(`<a href="https://www.youtube.com/watch?v=${encodeURIComponent(it.yt)}" target="_blank" rel="noopener">유튜브에서 보기 ↗</a>`);
+    (it.more || []).forEach((m) => { const mu = safeUrl(m && m.url); if (mu) out.push(`<a href="${esc(mu)}" target="_blank" rel="noopener">${esc(m.label || '더 보기')} ↗</a>`); });
+    return out.join(' · ');
+  }
+  function cardHTML(it, showWhere) {
+    const img = Array.isArray(it.img) ? it.img[0] : it.img;
+    const tags = (it.tags || []).map((t) => `<span>#${esc(t)}</span>`).join('');
+    const rel = (it.related || []).filter((r) => itemById.has(r.id)).map((r) => `<button type="button" data-go="${esc(r.id)}">${esc(r.title)}</button>`).join('');
+    return `<article class="card" id="c-${esc(it.id)}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+      <h3><span class="kind">${esc(it.kl || KL[it.kind] || '자료')}</span>${esc(it.title)}</h3>
+      ${showWhere ? `<div class="where">${esc(it._area.name)}</div>` : ''}
+      ${it.desc ? `<p>${esc(it.desc)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}
+      ${tags ? `<div class="chips">${tags}</div>` : ''}
+      ${rel ? `<div class="where">연결된 자료</div><div class="chips">${rel}</div>` : ''}
+      ${links(it) ? `<div>${links(it)}</div>` : ''}</article>`;
+  }
+  function openArea(a, focusId) {
+    const z = zoneOf(a.id);
+    const story = (a.story || []).map((s) => `<p class="story">${esc(s)}</p>`).join('');
+    const more = a.count > a.items.length ? `<p class="empty">자료 ${a.count}건 가운데 ${a.items.length}건을 올렸어요.</p>` : '';
+    showPanel(a.name, [z && z.name, a.sub].filter(Boolean).join(' · '), story + more + (a.items.map((it) => cardHTML(it, false)).join('') || '<p class="empty">자료가 없어요.</p>'));
+    if (focusId) { const c = document.getElementById('c-' + focusId); if (c) { c.scrollIntoView({ block: 'center' }); c.classList.add('flash'); } }
+  }
+  function openHub() {
+    const story = ((DX.hub && DX.hub.story) || []).map((s) => `<p class="story">${esc(s)}</p>`).join('');
+    const list = order.map((a) => `<button type="button" class="card" data-area="${esc(a.id)}" style="text-align:left;cursor:pointer;border-left:4px solid ${esc(a.color || '#fff')}"><h3>${esc(a.name)}</h3><p>자료 ${a.count}건${a.sub ? ' · ' + esc(a.sub) : ''}</p></button>`).join('');
+    showPanel(hubName, hubSub, story + list);
+  }
+  $('#pBody').addEventListener('click', (e) => {
+    const go = e.target.closest('[data-go]'); if (go) { const it = itemById.get(go.dataset.go); if (it) openArea(it._area, it.id); return; }
+    const ar = e.target.closest('[data-area]'); if (ar) { const a = areas.find((x) => x.id === ar.dataset.area); if (a) openArea(a); }
+  });
+
+  // search
+  let timer;
+  $('#q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 180); });
+  function search() {
+    const q = $('#q').value.trim().toLowerCase();
+    planets.forEach((p) => p.el.classList.remove('dim', 'hit'));
+    if (!q) { panel.classList.remove('open'); return; }
+    const hits = [];
+    areas.forEach((a) => a.items.forEach((it) => { const hay = [it.title, it.desc, (it.tags || []).join(' '), a.name].join(' ').toLowerCase(); if (hay.includes(q)) hits.push(it); }));
+    const hitAreas = new Set(hits.map((it) => it._area.id));
+    planets.forEach((p) => p.el.classList.add(hitAreas.has(p.a.id) ? 'hit' : 'dim'));
+    showPanel(`‘${$('#q').value.trim()}’ 찾기`, `자료 ${hits.length}건`, hits.slice(0, 80).map((it) => cardHTML(it, true)).join('') || '<p class="empty">맞는 자료가 없어요. 다른 낱말로 찾아보세요.</p>');
+  }
+
+  // flat view
+  function renderFlat() {
+    $('#flatGrid').innerHTML = order.map((a) => `<button type="button" class="area" data-area="${esc(a.id)}" style="--c:${esc(a.color || '#fff')}"><h3>${esc(a.name)}</h3><p>자료 ${a.count}건${a.sub ? ' · ' + esc(a.sub) : ''}</p><ul>${a.items.slice(0, 5).map((it) => `<li>${esc(it.title)}</li>`).join('')}</ul></button>`).join('');
+  }
+  $('#flatGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-area]'); if (b) openArea(areas.find((a) => a.id === b.dataset.area)); });
+  function setFlat(on) { document.body.classList.toggle('flat', on); $('#flat').classList.toggle('on', on); $('#flatBtn').setAttribute('aria-pressed', String(on)); $('#flatBtn').textContent = on ? '우주로 보기' : '평면으로 보기'; }
+  $('#flatBtn').addEventListener('click', () => setFlat(!document.body.classList.contains('flat')));
+
+  if (window.PKOS_PREVIEW) $('#schoolLink').hidden = true;
+  renderFlat(); layout(); addEventListener('resize', layout);
+  if (innerWidth < 640 || !areas.length) setFlat(true);
+  if (!reduce) requestAnimationFrame(tick);
+  window.PKOSMAP = { areas, openArea, openHub };
+})();
+</script>
+</body>
+</html>
